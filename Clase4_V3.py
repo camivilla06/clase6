@@ -1,86 +1,65 @@
-class Entidad:
+class Paciente:
     def __init__(self):
-        self.__nombre = ''
-        self.__id = 0  # Cedula o Historia Clínica
+        self.datos = {
+            'nombre': '',
+            'cedula': 0,
+            'genero': '',
+            'servicio': ''
+        }
 
-    # Métodos comunes
-    def verNombre(self):
-        return self.__nombre
-    def verId(self):
-        return self.__id
-    def asignarNombre(self, n):
-        self.__nombre = n
-    def asignarId(self, id):
-        self.__id = id
-
-class Paciente(Entidad):
-    def __init__(self):
-        super().__init__()  # Hereda nombre e id
-        self.__genero = ''
-        self.__servicio = ''
-
-    # Métodos específicos
-    def asignarGenero(self, g):
-        self.__genero = g
-    def verGenero(self):
-        return self.__genero
-    def asignarServicio(self, s):
-        self.__servicio = s
-    def verServicio(self):
-        return self.__servicio
+    # Métodos dinámicos
+    def asignarDato(self, clave, valor):
+        if clave in self.datos:
+            self.datos[clave] = valor
+    def verDato(self, clave):
+        return self.datos.get(clave, None)
 
 class Sistema:    
     def __init__(self):
         self.__lista_pacientes = [] 
         
     def verificarPaciente(self, cedula):
-        for p in self.__lista_pacientes:
-            if cedula == p.verId():  # Usamos verId() en lugar de verCedula()
-                return True 
-        return False
+        return any(p.verDato('cedula') == cedula for p in self.__lista_pacientes)
         
     def ingresarPaciente(self, pac):
         self.__lista_pacientes.append(pac)
         return True
     
     def verDatosPaciente(self, c):
-        if not self.verificarPaciente(c):
-            return None
         for p in self.__lista_pacientes:
-            if c == p.verId():  # Usamos verId()
+            if p.verDato('cedula') == c:
                 return p
+        return None
             
     def verNumeroPacientes(self):
-        print("En el sistema hay: " + str(len(self.__lista_pacientes)) + " pacientes") 
+        print("En el sistema hay:", len(self.__lista_pacientes), "pacientes")
 
 def main():
     sis = Sistema() 
     while True:
-        opcion = int(input("\nIngrese \n0 para salir, \n1 para ingresar nuevo paciente, \n2 ver Paciente\n\t--> ")) 
-        
+        opcion = int(input("\nIngrese \n0 para salir, \n1 para ingresar paciente, \n2 ver Paciente\n\t--> ")) 
         if opcion == 1:
-            cedula = int(input("Ingrese la cedula: ")) 
+            cedula = int(input("Cédula: ")) 
             if sis.verificarPaciente(cedula):
-                print("\n<< Ya existe un paciente con esa cedula >>".upper()) 
+                print("\n<< Ya existe un paciente con esa cédula >>".upper()) 
             else:    
                 pac = Paciente() 
-                pac.asignarNombre(input("Ingrese el nombre: ")) 
-                pac.asignarId(cedula)  # Usamos asignarId()
-                pac.asignarGenero(input("Ingrese el genero: ")) 
-                pac.asignarServicio(input("Ingrese servicio: ")) 
-                r = sis.ingresarPaciente(pac)             
-                if r:
-                    print("Paciente ingresado") 
+                pac.asignarDato('nombre', input("Nombre: ")) 
+                pac.asignarDato('cedula', cedula)
+                pac.asignarDato('genero', input("Género: ")) 
+                pac.asignarDato('servicio', input("Servicio: ")) 
+                sis.ingresarPaciente(pac)
+                print("Paciente ingresado!") 
         elif opcion == 2:
-            c = int(input("Ingrese la cedula a buscar: ")) 
+            c = int(input("Cédula a buscar: ")) 
             p = sis.verDatosPaciente(c) 
-            if p != None:
-                print("Nombre: " + p.verNombre()) 
-                print("Cedula: " + str(p.verId()))  # Usamos verId()
-                print("Genero: " + p.verGenero()) 
-                print("Servicio: " + p.verServicio()) 
+            if p:
+                print("Nombre:", p.verDato('nombre')) 
+                print("Cédula:", p.verDato('cedula')) 
+                print("Género:", p.verDato('genero')) 
+                print("Servicio:", p.verDato('servicio')) 
             else:
-                print("No existe un paciente con esa cedula") 
+                print("No existe un paciente con esa cédula") 
         elif opcion == 0:
             break 
 
