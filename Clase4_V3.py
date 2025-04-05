@@ -1,67 +1,53 @@
-class Paciente:
-    def __init__(self):
-        self.datos = {
-            'nombre': '',
-            'cedula': 0,
-            'genero': '',
-            'servicio': ''
-        }
+class Sistema:
+    def __init__(self, archivo='pacientes.txt'):
+        self.__archivo = archivo
 
-    # Métodos dinámicos
-    def asignarDato(self, clave, valor):
-        if clave in self.datos:
-            self.datos[clave] = valor
-    def verDato(self, clave):
-        return self.datos.get(clave, None)
-
-class Sistema:    
-    def __init__(self):
-        self.__lista_pacientes = [] 
-        
     def verificarPaciente(self, cedula):
-        return any(p.verDato('cedula') == cedula for p in self.__lista_pacientes)
-        
-    def ingresarPaciente(self, pac):
-        self.__lista_pacientes.append(pac)
+        with open(self.__archivo, 'r') as f:
+            for linea in f.readlines():
+                if linea.split(',')[1] == str(cedula):
+                    return True
+        return False
+
+    def ingresarPaciente(self, nombre, cedula, genero, servicio):
+        with open(self.__archivo, 'a') as f:
+            f.write(f"{nombre},{cedula},{genero},{servicio}\n")
         return True
-    
-    def verDatosPaciente(self, c):
-        for p in self.__lista_pacientes:
-            if p.verDato('cedula') == c:
-                return p
+
+    def verDatosPaciente(self, cedula):
+        with open(self.__archivo, 'r') as f:
+            for linea in f.readlines():
+                datos = linea.strip().split(',')
+                if datos[1] == str(cedula):
+                    return datos
         return None
-            
-    def verNumeroPacientes(self):
-        print("En el sistema hay:", len(self.__lista_pacientes), "pacientes")
 
 def main():
-    sis = Sistema() 
+    sis = Sistema()
     while True:
-        opcion = int(input("\nIngrese \n0 para salir, \n1 para ingresar paciente, \n2 ver Paciente\n\t--> ")) 
+        opcion = int(input("\n0. Salir \n1. Ingresar paciente \n2. Buscar paciente\nOpción: "))
         if opcion == 1:
-            cedula = int(input("Cédula: ")) 
-            if sis.verificarPaciente(cedula):
-                print("\n<< Ya existe un paciente con esa cédula >>".upper()) 
-            else:    
-                pac = Paciente() 
-                pac.asignarDato('nombre', input("Nombre: ")) 
-                pac.asignarDato('cedula', cedula)
-                pac.asignarDato('genero', input("Género: ")) 
-                pac.asignarDato('servicio', input("Servicio: ")) 
-                sis.ingresarPaciente(pac)
-                print("Paciente ingresado!") 
-        elif opcion == 2:
-            c = int(input("Cédula a buscar: ")) 
-            p = sis.verDatosPaciente(c) 
-            if p:
-                print("Nombre:", p.verDato('nombre')) 
-                print("Cédula:", p.verDato('cedula')) 
-                print("Género:", p.verDato('genero')) 
-                print("Servicio:", p.verDato('servicio')) 
+            cedula = int(input("Cédula: "))
+            if not sis.verificarPaciente(cedula):
+                nombre = input("Nombre: ")
+                genero = input("Género: ")
+                servicio = input("Servicio: ")
+                sis.ingresarPaciente(nombre, cedula, genero, servicio)
+                print("Paciente guardado!")
             else:
-                print("No existe un paciente con esa cédula") 
+                print("Cédula ya existe.")
+        elif opcion == 2:
+            cedula = int(input("Cédula a buscar: "))
+            datos = sis.verDatosPaciente(cedula)
+            if datos:
+                print("Nombre:", datos[0])
+                print("Cédula:", datos[1])
+                print("Género:", datos[2])
+                print("Servicio:", datos[3])
+            else:
+                print("No encontrado.")
         elif opcion == 0:
-            break 
+            break
 
 if __name__ == "__main__":
     main()
